@@ -27,4 +27,4 @@ jobs:
       env:
         COOKIE: ${{ secrets.COOKIE }}
       run: |
-        python checkin.py
+        python main.py
