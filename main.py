@@ -27,19 +27,21 @@ session.cookies.update(cookies)
 response = session.get(check_status_url)
 soup = BeautifulSoup(response.text, 'html.parser')
 
+# 获取CSRF token
+csrf_meta = soup.find('meta', {'name': 'csrf-token'})
+if csrf_meta:
+    csrf_token = csrf_meta['content']
+    session.headers.update({'X-Csrf-Token': csrf_token})
+else:
+    print('无法获取CSRF token，签到失败')
+    exit()
+
 # 假设页面中存在一个表示签到状态的元素，检查该元素内容
 checkin_status = soup.find('div', {'class': 'checkin-info'})  # 需要根据实际页面结构调整
 if checkin_status and '已签到' in checkin_status.text:
     print(checkin_status.text.replace(' ', "").replace('\n', ''))
 else:
     print('今天未签到，开始签到')
-    # 获取CSRF token（假设CSRF token存在于页面或cookie中）
-    csrf_token = session.cookies.get('X-Csrf-Token')
-    if csrf_token:
-        session.headers.update({'X-Csrf-Token': csrf_token})
-    else:
-        print('无法获取CSRF token，签到失败')
-        exit()
 
     # 发送签到请求
     checkin_response = session.post(checkin_url)
